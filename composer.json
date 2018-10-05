@@ -19,7 +19,7 @@
         "felixfbecker/language-server-protocol": "^1.2",
         "felixfbecker/advanced-json-rpc": "^3.0.3",
         "netresearch/jsonmapper": "^1.0",
-        "sabre/event": "^5.0",
+        "sabre/event": "^5.0.1",
         "sabre/uri": "^2.0",
         "webmozart/glob": "^4.1",
         "webmozart/path-util": "^2.3"
