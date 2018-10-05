@@ -211,8 +211,9 @@ class LanguageServer extends AdvancedJsonRpc\Dispatcher
 
     /**
      * @psalm-suppress PossiblyUnusedMethod
+     * @return void
      */
-    public function initialized() : void
+    public function initialized()
     {
     }
 
