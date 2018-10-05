@@ -32,6 +32,8 @@ use Psalm\Provider\FileStorageProvider;
  *     column_to: int
  * }
  *
+ * @psalm-type  TaggedCodeType = array<int, array{0: int, 1: string}>
+ *
  * @psalm-type  WorkerData = array{
  *     issues: array<int, IssueData>,
  *     file_references: array<string, array<string,bool>>,
@@ -147,7 +149,7 @@ class Analyzer
      *
      * @psalm-suppress MixedOperand
      */
-    private function getFileChecker(ProjectChecker $project_checker, $file_path, array $filetype_checkers)
+    public function getFileChecker(ProjectChecker $project_checker, $file_path, array $filetype_checkers)
     {
         $extension = (string)pathinfo($file_path)['extension'];
 
