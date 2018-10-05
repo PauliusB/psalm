@@ -86,6 +86,11 @@ class FileReferenceProvider
     private static $issues = [];
 
     /**
+     * @var array<string, array{0: array<int, array{0: int, 1: string}>, 1: array<int, array{0: int, 1: string}>}>
+     */
+    private static $file_maps = [];
+
+    /**
      * @var ?FileReferenceCacheProvider
      */
     public $cache;
@@ -293,6 +298,8 @@ class FileReferenceProvider
 
             self::$issues = $issues;
 
+            self::$file_maps = $this->cache->getFileMapCache() ?: [];
+
             return true;
         }
 
@@ -331,6 +338,7 @@ class FileReferenceProvider
             $this->cache->setCachedFileReferences(self::$file_references);
             $this->cache->setCachedMethodReferences(self::$class_method_references);
             $this->cache->setCachedIssues(self::$issues);
+            $this->cache->setFileMapCache(self::$file_maps);
             $this->cache->setCorrectMethodCache(self::$correct_methods);
         }
     }
@@ -398,6 +406,15 @@ class FileReferenceProvider
      * @param string $file_path
      * @return void
      */
+    public function clearExistingFileMapsForFile($file_path)
+    {
+        unset(self::$file_maps[$file_path]);
+    }
+
+    /**
+     * @param string $file_path
+     * @return void
+     */
     public function addIssue($file_path, array $issue)
     {
         if (!isset(self::$issues[$file_path])) {
@@ -417,11 +434,28 @@ class FileReferenceProvider
     }
 
     /**
+     * @param array<string, array{0: TaggedCodeType, 1: TaggedCodeType}> $file_maps
+     * @return  void
+     */
+    public function setFileMaps(array $file_maps)
+    {
+        self::$file_maps = $file_maps;
+    }
+
+    /**
      * @return array<string, array<string, bool>>
      */
     public function getCorrectMethods()
     {
         return self::$correct_methods;
+    }
+
+    /**
+     * @return array<string, array{0: TaggedCodeType, 1: TaggedCodeType}>
+     */
+    public function getFileMaps()
+    {
+        return self::$file_maps;
     }
 
     /**
@@ -437,5 +471,6 @@ class FileReferenceProvider
         self::$class_method_references = [];
         self::$correct_methods = [];
         self::$issues = [];
+        self::$file_maps = [];
     }
 }
