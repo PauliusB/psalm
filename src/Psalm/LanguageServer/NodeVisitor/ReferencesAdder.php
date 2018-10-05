@@ -3,7 +3,10 @@ declare(strict_types = 1);
 
 namespace Psalm\LanguageServer\NodeVisitor;
 
-use PhpParser\{NodeVisitorAbstract, Node};
+use PhpParser\{
+    NodeVisitorAbstract,
+    Node
+};
 
 /**
  * Decorates all nodes with parent and sibling references (similar to DOM nodes)
@@ -25,7 +28,9 @@ class ReferencesAdder extends NodeVisitorAbstract
         if (!empty($this->stack)) {
             $node->setAttribute('parentNode', end($this->stack));
         }
-        if (isset($this->previous) && $this->previous->getAttribute('parentNode') === $node->getAttribute('parentNode')) {
+        if (isset($this->previous)
+            && $this->previous->getAttribute('parentNode') === $node->getAttribute('parentNode')
+        ) {
             $node->setAttribute('previousSibling', $this->previous);
             $this->previous->setAttribute('nextSibling', $node);
         }

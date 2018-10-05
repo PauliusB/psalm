@@ -20,6 +20,8 @@ use Psalm\Config;
  *     column_from: int,
  *     column_to: int
  * }
+ *
+ * @psalm-type  TaggedCodeType = array<int, array{0: int, 1: string}>
  */
 /**
  * Used to determine which files reference other files, necessary for using the --diff
@@ -31,6 +33,7 @@ class FileReferenceCacheProvider
     const CORRECT_METHODS_CACHE_NAME = 'correct_methods';
     const CLASS_METHOD_CACHE_NAME = 'class_method_references';
     const ISSUES_CACHE_NAME = 'issues';
+    const FILE_MAPS_CACHE_NAME = 'file_maps';
 
     /**
      * @var Config
@@ -178,23 +181,23 @@ class FileReferenceCacheProvider
     }
 
     /**
-     * @return array<string, array<string, bool>>
+     * @return array<string, array<string, bool>>|false
      */
-    public function getCorrectMethodCache(Config $config)
+    public function getCorrectMethodCache()
     {
-        $cache_directory = $config->getCacheDirectory();
+        $cache_directory = $this->config->getCacheDirectory();
 
         $correct_methods_cache_location = $cache_directory . DIRECTORY_SEPARATOR . self::CORRECT_METHODS_CACHE_NAME;
 
         if ($cache_directory
             && file_exists($correct_methods_cache_location)
-            && filemtime($correct_methods_cache_location) > $config->modified_time
+            && filemtime($correct_methods_cache_location) > $this->config->modified_time
         ) {
             /** @var array<string, array<string, bool>> */
             return unserialize(file_get_contents($correct_methods_cache_location));
         }
 
-        return [];
+        return false;
     }
 
     /**
