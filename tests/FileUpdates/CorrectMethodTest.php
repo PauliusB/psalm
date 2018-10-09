@@ -1030,6 +1030,84 @@ class CorrectMethodTest extends \Psalm\Tests\TestCase
                     'RedundantConditionGivenDocblockType' => \Psalm\Config::REPORT_INFO,
                 ]
             ],
+            'noChangeAfterSyntaxError' => [
+                'start_files' => [
+                    getcwd() . DIRECTORY_SEPARATOR . 'A.php' => '<?php
+                        namespace Foo;
+
+                        class A {
+                            /** @var string|null */
+                            private $foo;
+
+                            public function __construct() {}
+
+                            public function bar() : void {
+                                if ($this->foo === null) {}
+                            }
+                        }',
+                ],
+                'end_files' => [
+                    getcwd() . DIRECTORY_SEPARATOR . 'A.php' => '<?php
+                        namespace Foo;
+
+                        class A {
+                            /** @var string|null */
+                            private $foo
+
+                            public function __construct() {}
+
+                            public function bar() : void {
+                                if ($this->foo === null) {}
+                            }
+                        }',
+                ],
+                'initial_correct_methods' => [
+                    getcwd() . DIRECTORY_SEPARATOR . 'A.php' => [
+                        'foo\a::__construct' => 1,
+                        'foo\a::bar' => 1,
+                    ],
+                ],
+                'unaffected_correct_methods' => [
+                    getcwd() . DIRECTORY_SEPARATOR . 'A.php' => [
+                        'foo\a::__construct' => 1,
+                        'foo\a::bar' => 1,
+                    ],
+                ]
+            ],
+            'nothingBeforeSyntaxError' => [
+                'start_files' => [
+                    getcwd() . DIRECTORY_SEPARATOR . 'A.php' => '<?php
+                        namespace Foo;
+
+                        class A {
+                            /** @var string|null */
+                            private $foo
+
+                            public function __construct() {}
+
+                            public function bar() : void {
+                                if ($this->foo === null) {}
+                            }
+                        }',
+                ],
+                'end_files' => [
+                    getcwd() . DIRECTORY_SEPARATOR . 'A.php' => '<?php
+                        namespace Foo;
+
+                        class A {
+                            /** @var string|null */
+                            private $foo;
+
+                            public function __construct() {}
+
+                            public function bar() : void {
+                                if ($this->foo === null) {}
+                            }
+                        }',
+                ],
+                'initial_correct_methods' => [],
+                'unaffected_correct_methods' => []
+            ],
         ];
     }
 }

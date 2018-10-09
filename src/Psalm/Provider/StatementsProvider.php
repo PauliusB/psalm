@@ -3,6 +3,7 @@ namespace Psalm\Provider;
 
 use PhpParser;
 use Psalm\Checker\ProjectChecker;
+use Psalm\Exception\ParseException;
 
 class StatementsProvider
 {
@@ -87,7 +88,13 @@ class StatementsProvider
                 echo 'Parsing ' . $file_path . "\n";
             }
 
-            return self::parseStatements($file_contents, $file_path) ?: [];
+            try {
+                $stmts = self::parseStatements($file_contents, $file_path);
+            } catch (ParseException $e) {
+                $stmts = [];
+            }
+
+            return $stmts ?: [];
         }
 
         $file_content_hash = md5($version . $file_contents);
@@ -107,7 +114,12 @@ class StatementsProvider
                 echo 'Parsing ' . $file_path . "\n";
             }
 
-            $stmts = self::parseStatements($file_contents, $file_path);
+            try {
+                $stmts = self::parseStatements($file_contents, $file_path);
+            } catch (ParseException $e) {
+                // if there's an exception, we want to exit immediately to prevent pollution of ASTs
+                return [];
+            }
 
             $existing_file_contents = $this->parser_cache_provider->loadExistingFileContentsFromCache($file_cache_key);
 
@@ -258,6 +270,7 @@ class StatementsProvider
      * @param  string   $file_path
      *
      * @return array<int, \PhpParser\Node\Stmt>
+     * @throws ParseException
      */
     public static function parseStatements($file_contents, $file_path = null)
     {
@@ -300,6 +313,8 @@ class StatementsProvider
                     );
                 }
             }
+
+            throw new ParseException('Parse error in ' . $file_path);
         }
 
         self::$node_traverser->traverse($stmts);
