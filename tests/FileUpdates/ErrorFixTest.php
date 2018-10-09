@@ -50,6 +50,7 @@ class ErrorFixTest extends \Psalm\Tests\TestCase
      * @param array<string, string> $start_files
      * @param array<string, string> $middle_files
      * @param array<string, string> $end_files
+     * @param array<int, int> $error_counts
      * @param array<string, string> $error_levels
      *
      * @return void
@@ -58,6 +59,7 @@ class ErrorFixTest extends \Psalm\Tests\TestCase
         array $start_files,
         array $middle_files,
         array $end_files,
+        array $error_counts,
         array $error_levels = []
     ) {
         $this->project_checker->diff_methods = true;
@@ -88,7 +90,7 @@ class ErrorFixTest extends \Psalm\Tests\TestCase
 
         $data = \Psalm\IssueBuffer::clear();
 
-        $this->assertSame([], $data);
+        $this->assertSame($error_counts[0], count($data));
 
         // second batch
         foreach ($middle_files as $file_path => $contents) {
@@ -108,7 +110,7 @@ class ErrorFixTest extends \Psalm\Tests\TestCase
 
         $data = \Psalm\IssueBuffer::clear();
 
-        $this->assertNotEmpty($data);
+        $this->assertSame($error_counts[1], count($data));
 
         // first batch
         foreach ($end_files as $file_path => $contents) {
@@ -128,7 +130,7 @@ class ErrorFixTest extends \Psalm\Tests\TestCase
 
         $data = \Psalm\IssueBuffer::clear();
 
-        $this->assertSame([], $data);
+        $this->assertSame($error_counts[2], count($data));
     }
 
     /**
@@ -171,6 +173,55 @@ class ErrorFixTest extends \Psalm\Tests\TestCase
                             }
                         }',
                 ],
+                'error_counts' => [0, 1, 0],
+            ],
+            'addReturnTypesToSingleMethod' => [
+                'start_files' => [
+                    getcwd() . DIRECTORY_SEPARATOR . 'A.php' => '<?php
+                        namespace Foo;
+
+                        class A {
+                            public function foo() {
+                                return 5;
+                            }
+
+                            public function bar() {
+                                return $this->foo();
+                            }
+                        }',
+                ],
+                'middle_files' => [
+                    getcwd() . DIRECTORY_SEPARATOR . 'A.php' => '<?php
+                        namespace Foo;
+
+                        class A {
+                            public function foo() : int {
+                                return 5;
+                            }
+
+                            public function bar() {
+                                return $this->foo();
+                            }
+                        }',
+                ],
+                'end_files' => [
+                    getcwd() . DIRECTORY_SEPARATOR . 'A.php' => '<?php
+                        namespace Foo;
+
+                        class A {
+                            public function foo() : int {
+                                return 5;
+                            }
+
+                            public function bar() : int {
+                                return $this->foo();
+                            }
+                        }',
+                ],
+                'error_counts' => [2, 1, 0],
+                [
+                    'MissingReturnType' => \Psalm\Config::REPORT_INFO,
+                ]
             ],
         ];
     }
